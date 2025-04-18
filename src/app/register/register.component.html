@@ -1,0 +1,7 @@
+<div>
+  <h2>Регистрация</h2>
+  <input [(ngModel)]="username" placeholder="Логин" />
+  <input [(ngModel)]="password" type="password" placeholder="Пароль" />
+  <button (click)="register()">Зарегистрироваться</button>
+  <p *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>
