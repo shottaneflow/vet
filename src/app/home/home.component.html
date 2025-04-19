@@ -1,0 +1,87 @@
+<div class="container mt-4">
+  <div class="header-section mb-4">
+    <h1 class="text-center text-primary mb-3">Главная страница</h1>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div *ngIf="!isAdmin">
+        <button (click)="goToProfile()" class="btn btn-info">
+          <i class="fas fa-user-circle me-2"></i>Перейти в профиль
+        </button>
+      </div>
+
+      <button (click)="logout()" class="btn btn-danger">
+        <i class="fas fa-sign-out-alt me-2"></i>Выйти
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isAdmin">
+    <div class="admin-panel card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <div class="d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Панель администратора</h2>
+          <button (click)="goToCreateDoctor()" class="btn btn-light btn-sm">
+            <i class="fas fa-plus-circle me-1"></i> Добавить врача
+          </button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <h3 class="h6 text-muted mb-3">Список врачей</h3>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+              <th width="25%">ФИО</th>
+              <th width="25%">Email</th>
+              <th width="20%">Телефон</th>
+              <th width="30%">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let doctor of doctors" class="align-middle">
+              <td>
+                <div *ngIf="!editMode[doctor.id]">{{ doctor.fullName }}</div>
+                <input *ngIf="editMode[doctor.id]"
+                       [(ngModel)]="doctor.fullName"
+                       class="form-control form-control-sm">
+              </td>
+              <td>
+                <div *ngIf="!editMode[doctor.id]">{{ doctor.email }}</div>
+                <input *ngIf="editMode[doctor.id]"
+                       [(ngModel)]="doctor.email"
+                       class="form-control form-control-sm">
+              </td>
+              <td>
+                <div *ngIf="!editMode[doctor.id]">{{ doctor.phoneNumber }}</div>
+                <input *ngIf="editMode[doctor.id]"
+                       [(ngModel)]="doctor.phoneNumber"
+                       class="form-control form-control-sm">
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button *ngIf="!editMode[doctor.id]"
+                          (click)="toggleEditMode(doctor.id)"
+                          class="btn btn-outline-warning">
+                    <i class="fas fa-edit me-1"></i> Редактировать
+                  </button>
+                  <button *ngIf="editMode[doctor.id]"
+                          (click)="updateDoctor(doctor)"
+                          class="btn btn-outline-success">
+                    <i class="fas fa-save me-1"></i> Сохранить
+                  </button>
+                  <button (click)="deleteDoctor(doctor.id)"
+                          class="btn btn-outline-danger">
+                    <i class="fas fa-trash-alt me-1"></i> Удалить
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
