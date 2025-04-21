@@ -4,19 +4,24 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div *ngIf="!isAdmin">
-        <button (click)="goToProfile()" class="btn btn-info">
-          <i class="fas fa-user-circle me-2"></i>Перейти в профиль
+        <button (click)="goToProfile()" class="btn btn-info me-2">
+          <i class="fas fa-user-circle me-2"></i>Профиль
+        </button>
+        <button (click)="goToCreateAnimal()" class="btn btn-success">
+          <i class="fas fa-plus-circle me-2"></i>Добавить животное
         </button>
       </div>
-
       <button (click)="logout()" class="btn btn-danger">
         <i class="fas fa-sign-out-alt me-2"></i>Выйти
       </button>
+
+
     </div>
   </div>
 
+  <!-- Панель администратора -->
   <div *ngIf="isAdmin">
-    <div class="admin-panel card shadow-sm">
+    <div class="admin-panel card shadow-sm mb-4">
       <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
           <h2 class="h5 mb-0">Панель администратора</h2>
@@ -28,7 +33,6 @@
 
       <div class="card-body">
         <h3 class="h6 text-muted mb-3">Список врачей</h3>
-
         <div class="table-responsive">
           <table class="table table-hover">
             <thead class="table-light">
@@ -63,12 +67,12 @@
                 <div class="btn-group btn-group-sm" role="group">
                   <button *ngIf="!editMode[doctor.id]"
                           (click)="toggleEditMode(doctor.id)"
-                          class="btn btn-outline-warning">
-                    <i class="fas fa-edit me-1"></i> Редактировать
+                          class="btn btn-outline-warning me-1">
+                    <i class="fas fa-edit me-1"></i> Ред.
                   </button>
                   <button *ngIf="editMode[doctor.id]"
                           (click)="updateDoctor(doctor)"
-                          class="btn btn-outline-success">
+                          class="btn btn-outline-success me-1">
                     <i class="fas fa-save me-1"></i> Сохранить
                   </button>
                   <button (click)="deleteDoctor(doctor.id)"
@@ -84,4 +88,279 @@
       </div>
     </div>
   </div>
+
+  <!-- Панель животных для обычных пользователей -->
+  <div *ngIf="!isAdmin">
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white">
+        <h2 class="h5 mb-0">Мои животные</h2>
+      </div>
+
+      <div class="card-body">
+        <div *ngIf="animals.length === 0" class="alert alert-info">
+          У вас пока нет животных. Добавьте первое животное!
+        </div>
+
+        <div *ngIf="animals.length > 0" class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+              <th width="25%">Тип животного</th>
+              <th width="25%">Дата рождения</th>
+              <th width="50%">Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let animal of animals" class="align-middle">
+              <td>
+                <div *ngIf="!animalEditMode[animal.id]">{{ animal.type }}</div>
+                <input *ngIf="animalEditMode[animal.id]"
+                       [(ngModel)]="animal.type"
+                       class="form-control form-control-sm">
+              </td>
+              <td>
+                <div *ngIf="!animalEditMode[animal.id]">
+                  {{ animal.dateOfBirth | date:'dd.MM.yyyy' }}
+                </div>
+                <input *ngIf="animalEditMode[animal.id]"
+                       type="date"
+                       [(ngModel)]="animal.dateOfBirth"
+                       class="form-control form-control-sm">
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button *ngIf="!animalEditMode[animal.id]"
+                          (click)="toggleAnimalEditMode(animal.id)"
+                          class="btn btn-outline-warning me-1">
+                    <i class="fas fa-edit me-1"></i> Ред.
+                  </button>
+                  <button *ngIf="animalEditMode[animal.id]"
+                          (click)="updateAnimal(animal)"
+                          class="btn btn-outline-success me-1">
+                    <i class="fas fa-save me-1"></i> Сохранить
+                  </button>
+                  <button (click)="deleteAnimal(animal.id)"
+                          class="btn btn-outline-danger me-1">
+                    <i class="fas fa-trash-alt me-1"></i> Удалить
+                  </button>
+                  <button (click)="openVaccinationsModal(animal.id)"
+                          class="btn btn-outline-info me-1">
+                    <i class="fas fa-syringe me-1"></i> Прививки
+                  </button>
+                  <button (click)="openVisitsModal(animal.id)"
+                          class="btn btn-outline-primary">
+                    <i class="fas fa-calendar-check me-1"></i> Визиты
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Модальное окно для работы с прививками -->
+<div class="modal fade" [class.show]="showVaccinationsModal" [style.display]="showVaccinationsModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title">Управление прививками</h5>
+        <button type="button" class="btn-close" (click)="showVaccinationsModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Форма добавления новой прививки -->
+        <div class="mb-4 p-3 border rounded">
+          <h6>Добавить новую прививку</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label">Название прививки</label>
+              <input type="text" class="form-control" [(ngModel)]="newVaccination.name" placeholder="Например: От бешенства">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Дата прививки</label>
+              <input type="date" class="form-control" [(ngModel)]="newVaccination.date">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button (click)="addVaccination()" class="btn btn-primary w-100">
+                <i class="fas fa-plus me-1"></i> Добавить
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Список прививок -->
+        <div *ngIf="vaccinations.length > 0">
+          <h6>Список прививок</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="table-light">
+              <tr>
+                <th width="40%">Название</th>
+                <th width="30%">Дата</th>
+                <th width="30%">Действия</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let v of vaccinations">
+                <td>
+                  <div *ngIf="!vaccinationEditMode[v.id]">{{ v.name }}</div>
+                  <input *ngIf="vaccinationEditMode[v.id]"
+                         [(ngModel)]="v.name"
+                         class="form-control form-control-sm">
+                </td>
+                <td>
+                  <div *ngIf="!vaccinationEditMode[v.id]">
+                    {{ v.date | date:'dd.MM.yyyy' }}
+                  </div>
+                  <input *ngIf="vaccinationEditMode[v.id]"
+                         type="date"
+                         [(ngModel)]="v.date"
+                         class="form-control form-control-sm">
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button *ngIf="!vaccinationEditMode[v.id]"
+                            (click)="toggleVaccinationEditMode(v.id)"
+                            class="btn btn-outline-warning me-1">
+                      <i class="fas fa-edit me-1"></i> Ред.
+                    </button>
+                    <button *ngIf="vaccinationEditMode[v.id]"
+                            (click)="updateVaccination(v)"
+                            class="btn btn-outline-success me-1">
+                      <i class="fas fa-check me-1"></i> Готово
+                    </button>
+                    <button (click)="deleteVaccination(v.id)"
+                            class="btn btn-outline-danger">
+                      <i class="fas fa-trash-alt me-1"></i> Удалить
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-backdrop fade" [class.show]="showVisitsModal"
+             [style.display]="showVisitsModal ? 'block' : 'none'"></div>
+
+        <div *ngIf="vaccinations.length === 0" class="alert alert-warning">
+          Нет добавленных прививок для этого животного
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showVaccinationsModal = false">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showVaccinationsModal"
+     [style.display]="showVaccinationsModal ? 'block' : 'none'"></div>
+<!-- Модальное окно для работы с визитами -->
+<div class="modal fade" [class.show]="showVisitsModal" [style.display]="showVisitsModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Управление визитами</h5>
+        <button type="button" class="btn-close" (click)="showVisitsModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Форма добавления нового визита -->
+        <div class="mb-4 p-3 border rounded">
+          <h6>Добавить новый визит</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label class="form-label">Дата визита</label>
+              <input type="date" class="form-control" [(ngModel)]="newVisit.visitDate">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Врач</label>
+              <select class="form-control" [(ngModel)]="newVisit.doctorId">
+                <option *ngFor="let doctor of doctors" [value]="doctor.id">{{ doctor.fullName }}</option>
+              </select>
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button (click)="addVisit()" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Добавить
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Список визитов -->
+        <div *ngIf="visits.length > 0">
+          <h6>Список визитов</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="table-light">
+              <tr>
+                <th width="40%">Дата</th>
+                <th width="30%">Врач</th>
+                <th width="30%">Действия</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let visit of visits">
+                <td>
+                  <div *ngIf="!visitEditMode[visit.id]">{{ visit.visitDate | date:'dd.MM.yyyy' }}</div>
+                  <input *ngIf="visitEditMode[visit.id]"
+                         type="date"
+                         [(ngModel)]="visit.visitDate"
+                         class="form-control form-control-sm">
+                </td>
+                <td>
+                  <div *ngIf="!visitEditMode[visit.id]">{{ getDoctorName(visit.vet.id) }}</div>
+                  <select *ngIf="visitEditMode[visit.id]"
+                          class="form-control form-control-sm"
+                          [(ngModel)]="visit.vet.id">
+                    <option *ngFor="let doctor of doctors" [value]="doctor.id">{{ doctor.fullName }}</option>
+                  </select>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button *ngIf="!visitEditMode[visit.id]"
+                            (click)="toggleVisitEditMode(visit.id)"
+                            class="btn btn-outline-warning me-1">
+                      <i class="fas fa-edit me-1"></i> Ред.
+                    </button>
+                    <button *ngIf="visitEditMode[visit.id]"
+                            (click)="updateVisit(visit)"
+                            class="btn btn-outline-success me-1">
+                      <i class="fas fa-check me-1"></i> Готово
+                    </button>
+                    <button (click)="deleteVisit(visit.id)"
+                            class="btn btn-outline-danger">
+                      <i class="fas fa-trash-alt me-1"></i> Удалить
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div *ngIf="visits.length === 0" class="alert alert-warning">
+          Нет добавленных визитов для этого животного
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showVisitsModal = false">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showVisitsModal"
+     [style.display]="showVisitsModal ? 'block' : 'none'"></div>
+
+
+
+
+
+
+
+
+

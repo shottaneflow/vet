@@ -11,7 +11,7 @@ export class VetService {
   constructor(private http: HttpClient) { }
 
   getDoctors(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/get-doctors`);
+    return this.http.get<any[]>(`http://localhost:8080/user-api/get-doctors`);
   }
 
   createDoctor(doctor: any): Observable<any> {

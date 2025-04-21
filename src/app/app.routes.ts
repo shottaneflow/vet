@@ -5,6 +5,7 @@ import {ProfileComponent} from './profile/profile.component';
 import {HomeComponent} from './home/home.component';
 import {AuthGuard} from './guard/auth.guard';
 import {CreateDoctorComponent} from './create-doctor/create-doctor.component';
+import { CreateAnimalComponent } from './create-animal/create-animal.component';
 
 
 export const routes: Routes = [
@@ -15,6 +16,7 @@ export const routes: Routes = [
     component: ProfileComponent,
     canActivate: [AuthGuard] // Защищаем страницу профиля
   },
+  { path: 'create-animal', component: CreateAnimalComponent,canActivate: [AuthGuard] },
   {
     path: '',
     component: HomeComponent,
