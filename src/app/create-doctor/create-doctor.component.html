@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="doctor-form-container">
   <h2>Добавить нового врача</h2>
 
   <form (ngSubmit)="createDoctor()">
@@ -10,7 +10,7 @@
 
     <div class="form-group">
       <label>Email</label>
-      <input type="text" class="form-control"
+      <input type="email" class="form-control"
              [(ngModel)]="doctor.email" name="email" required>
     </div>
 
@@ -20,10 +20,17 @@
              [(ngModel)]="doctor.phoneNumber" name="phoneNumber" required>
     </div>
 
-    <button type="submit" class="btn btn-primary">Создать</button>
-    <button type="button" class="btn btn-secondary ml-2"
-            (click)="goToHome()">
-      Отмена
-    </button>
+    <!-- Блок для вывода ошибок -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Создать</button>
+      <button type="button" class="btn btn-secondary"
+              (click)="goToHome()">
+        Отмена
+      </button>
+    </div>
   </form>
 </div>
